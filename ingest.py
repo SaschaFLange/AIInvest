@@ -1,15 +1,24 @@
+import os
 import time
 import yfinance as yf
 import psycopg2
 from psycopg2.extras import execute_values
 from datetime import datetime
 
-# Database Connection Settings
-DB_HOST = "timescaledb"
-DB_PORT = "5432"
-DB_NAME = "stock_data"
-DB_USER = "grafana_user"
-DB_PASS = "secret_password"
+# Non-sensitive variables get convenient local defaults
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "stock_data")
+
+# Sensitive variables MUST be explicitly provided via environment / .env
+DB_USER = os.environ.get("DB_USER")
+DB_PASS = os.environ.get("DB_PASS")
+
+if not DB_USER or not DB_PASS:
+    raise ValueError(
+        "FATAL: DB_USER and DB_PASS environment variables must be set. "
+        "Ensure your .env file is loaded or variables are exported."
+    )
 
 # List of stock tickers to monitor
 SYMBOLS = ["AAPL", "MSFT", "GOOGL", "NVDA", "RHM.DE"]

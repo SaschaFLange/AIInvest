@@ -6,11 +6,11 @@ services:
     container_name: timescaledb
     restart: always
     environment:
-      POSTGRES_USER: grafana_user
-      POSTGRES_PASSWORD: secret_password
-      POSTGRES_DB: stock_data
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - timescale_data:/var/lib/postgresql/data
 
@@ -19,9 +19,11 @@ services:
     container_name: grafana
     restart: always
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT}:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
     depends_on:
       - timescaledb
 
@@ -31,8 +33,13 @@ services:
     restart: always
     environment:
       - DB_HOST=timescaledb  # Connects directly inside Docker network
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
     depends_on:
       - timescaledb
 
 volumes:
   timescale_data:
+  grafana_data:
